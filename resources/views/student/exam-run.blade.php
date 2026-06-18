@@ -14,8 +14,22 @@
     </style>
 </head>
 <body class="text-slate-800 antialiased flex flex-col min-h-screen no-select" x-data="examEngine()">
+    <!-- Start Exam Overlay (Requires user click for Fullscreen API to work) -->
+    <div x-show="!examStarted" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-lg text-center shadow-2xl">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 font-[Outfit] mb-4">Siap Memulai?</h2>
+            <p class="text-slate-600 mb-6 leading-relaxed">Ujian ini menggunakan standar keamanan CBT. <strong>Layar akan diubah ke mode penuh (Fullscreen).</strong> Semua pintasan keyboard, blok teks, dan klik kanan telah dinonaktifkan.</p>
+            <button @click="startExamMode()" class="w-full justify-center flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 shadow-md shadow-blue-500/30 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Mulai Ujian
+            </button>
+        </div>
+    </div>
 
-    <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 h-screen overflow-hidden p-3">
+    <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 h-screen overflow-hidden p-3" x-show="examStarted" style="display: none;">
         <!-- Top Bar -->
         <header class="h-16 glass rounded-2xl flex items-center justify-between px-6 z-20 shrink-0 mb-3 shadow-sm border border-slate-200">
             <div class="flex items-center gap-4">
@@ -246,6 +260,7 @@
                 showNav: true,
                 showConfirm: false,
                 isSubmitting: false,
+                examStarted: false,
                 audioPlayed: {},
 
                 get currentQ() {
@@ -282,8 +297,10 @@
 
                     // Security measures
                     this.setupSecurity();
-                    
-                    // Request full screen
+                },
+
+                startExamMode() {
+                    this.examStarted = true;
                     this.requestFullscreen();
 
                     // Start Timer
@@ -386,14 +403,19 @@
                 },
 
                 setupSecurity() {
-                    document.addEventListener('contextmenu', e => { e.preventDefault(); alert('Tindakan dilarang!'); });
+                    document.addEventListener('contextmenu', e => { e.preventDefault(); });
                     document.addEventListener('copy', e => { e.preventDefault(); });
                     document.addEventListener('cut', e => { e.preventDefault(); });
                     document.addEventListener('paste', e => { e.preventDefault(); });
                     document.addEventListener('keydown', e => {
-                        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || (e.ctrlKey && ['U', 'C', 'V', 'X'].includes(e.key.toUpperCase()))) {
+                        // Prevent common shortcuts: F12, Ctrl+Shift+I/J/C, Ctrl+U/C/V/X, PrintScreen, Alt+Tab (limited)
+                        if (
+                            e.key === 'F12' || 
+                            e.key === 'PrintScreen' ||
+                            (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) || 
+                            (e.ctrlKey && ['U', 'C', 'V', 'X', 'S', 'P'].includes(e.key.toUpperCase()))
+                        ) {
                             e.preventDefault();
-                            alert('Tindakan dilarang!');
                         }
                     });
                 },

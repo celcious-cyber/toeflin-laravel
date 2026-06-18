@@ -164,14 +164,79 @@ class StudentController extends Controller
         $attempt->answers = $request->input('answers', []);
         $attempt->durationSeconds = $request->input('durationSeconds', 0);
 
-        // TODO: Kalkulasi Skor (sementara pakai dummy atau hitung sederhana)
-        // Di sistem asli, ini akan mencocokkan jawaban dengan $package->questions dan $score_conversions
-        $answers = $attempt->answers ?? [];
-        $correctCount = count($answers); // dummy
+        // Kalkulasi Skor
+        $package = $attempt->package;
+        $questions = is_array($package->questions) ? $package->questions : json_decode($package->questions, true) ?? [];
         
-        $attempt->rawScores = ['listening' => $correctCount, 'structure' => $correctCount, 'reading' => $correctCount];
-        $attempt->scaledScores = ['listening' => 50, 'structure' => 50, 'reading' => 50]; // dummy
-        $attempt->totalScore = 500; // dummy
+        $rawScores = ['Listening' => 0, 'Structure' => 0, 'Reading' => 0];
+        $totalQuestions = ['Listening' => 0, 'Structure' => 0, 'Reading' => 0];
+
+        // Hitung jawaban benar
+        $answers = $attempt->answers ?? [];
+        foreach ($questions as $q) {
+            $sec = $q['section'];
+            if (isset($totalQuestions[$sec])) {
+                $totalQuestions[$sec]++;
+            }
+            
+            $qId = $q['id'];
+            $correctAnswer = $q['answerKey'] ?? null;
+            $userAnswer = $answers[$qId] ?? null;
+
+            if ($correctAnswer && $userAnswer === $correctAnswer) {
+                if (isset($rawScores[$sec])) {
+                    $rawScores[$sec]++;
+                }
+            }
+        }
+
+        // Kalkulasi Scaled Scores
+        $scaledScores = ['Listening' => 31, 'Structure' => 31, 'Reading' => 31];
+        $minMax = [
+            'Listening' => ['min' => 31, 'max' => 68],
+            'Structure' => ['min' => 31, 'max' => 68],
+            'Reading'   => ['min' => 31, 'max' => 67],
+        ];
+
+        foreach (['Listening', 'Structure', 'Reading'] as $sec) {
+            $raw = $rawScores[$sec];
+            $total = $totalQuestions[$sec];
+            
+            if ($total == 0) {
+                $scaledScores[$sec] = $minMax[$sec]['min'];
+                continue;
+            }
+
+            // Coba ambil dari database konversi jika ada
+            $conversion = \App\Models\ScoreConversion::where('section', $sec)->where('rawScore', $raw)->first();
+            if ($conversion && $total == 140) { 
+                // Opsional: Tabel DB biasanya spesifik untuk 140 total soal (L:50, S:40, R:50)
+                // Jika soal tidak standar, lebih akurat pakai rumus interpolasi.
+                $scaledScores[$sec] = $conversion->scaledScore;
+            } else {
+                // Formula Interpolasi Linier (Fallback jika data tidak ada atau jumlah soal dinamis)
+                $min = $minMax[$sec]['min'];
+                $max = $minMax[$sec]['max'];
+                $scaled = $min + (($raw / $total) * ($max - $min));
+                $scaledScores[$sec] = round($scaled);
+            }
+        }
+
+        // Skor Total (Rata-rata * 10)
+        $totalScore = (int) round((($scaledScores['Listening'] + $scaledScores['Structure'] + $scaledScores['Reading']) / 3) * 10);
+
+        // Simpan ke DB
+        $attempt->rawScores = [
+            'listening' => $rawScores['Listening'], 
+            'structure' => $rawScores['Structure'], 
+            'reading' => $rawScores['Reading']
+        ];
+        $attempt->scaledScores = [
+            'listening' => $scaledScores['Listening'], 
+            'structure' => $scaledScores['Structure'], 
+            'reading' => $scaledScores['Reading']
+        ];
+        $attempt->totalScore = $totalScore;
 
         $attempt->save();
 
