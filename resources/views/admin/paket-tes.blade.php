@@ -263,16 +263,31 @@
             </div>
             <template x-if="editPkg">
                 <form :action="'{{ url('/admin/dashboard/paket-tes') }}/' + editPkg.id" method="POST" class="flex-1 overflow-y-auto flex flex-col md:flex-row" x-data="{ 
-                    testType: editPkg.type, 
+                    testType: 'Full Test', 
                     miniSection: 'Listening', 
-                    dList: ((editPkg.durations || {}).Listening || 0) / 60, 
-                    dStruct: ((editPkg.durations || {}).Structure || 0) / 60, 
-                    dRead: ((editPkg.durations || {}).Reading || 0) / 60,
-                    selectedQuestions: (editPkg.questions || []).map(q => q.id),
+                    dList: 0, 
+                    dStruct: 0, 
+                    dRead: 0,
+                    selectedQuestions: [],
                     allQ: @js($questions),
                     get filteredQ() {
                         if(this.testType === 'Full Test') return this.allQ;
                         return this.allQ.filter(q => q.section === this.miniSection);
+                    },
+                    init() {
+                        this.syncData();
+                        this.$watch('editPkg', () => {
+                            this.syncData();
+                        });
+                    },
+                    syncData() {
+                        if (editPkg) {
+                            this.testType = editPkg.type;
+                            this.dList = ((editPkg.durations || {}).Listening || 0) / 60;
+                            this.dStruct = ((editPkg.durations || {}).Structure || 0) / 60;
+                            this.dRead = ((editPkg.durations || {}).Reading || 0) / 60;
+                            this.selectedQuestions = (editPkg.questions || []).map(q => q.id);
+                        }
                     }
                 }" @change="if(testType === 'Full Test') { dList = 35; dStruct = 25; dRead = 60; } else { if(miniSection === 'Listening') { dStruct = 0; dRead = 0; if(dList === 0) dList = 20; } else if(miniSection === 'Structure') { dList = 0; dRead = 0; if(dStruct === 0) dStruct = 20; } else if(miniSection === 'Reading') { dList = 0; dStruct = 0; if(dRead === 0) dRead = 20; } }">
                     @csrf
@@ -358,7 +373,7 @@
                                 <div class="space-y-2">
                                     <template x-for="q in filteredQ" :key="q.id">
                                         <label class="flex items-start gap-3 p-3 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-colors cursor-pointer group">
-                                            <input type="checkbox" x-model="selectedQuestions" :value="q.id" class="mt-1 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600">
+                                            <input type="checkbox" :value="q.id" :checked="selectedQuestions.includes(q.id)" @change="$event.target.checked ? selectedQuestions.push(q.id) : selectedQuestions = selectedQuestions.filter(id => id !== q.id)" class="mt-1 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600">
                                             <div class="flex-1">
                                                 <div class="flex items-center gap-2 mb-1">
                                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider" 
