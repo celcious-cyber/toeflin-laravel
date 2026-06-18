@@ -393,4 +393,99 @@ class AdminController extends Controller
         
         return redirect()->back()->with('success', 'Akun ' . strtoupper($request->role) . ' berhasil ditambahkan.');
     }
+
+    private function syncQuestionToAllPackages($questionId)
+    {
+        $q = \App\Models\Question::with(['audio', 'passage'])->find($questionId);
+        if (!$q) return;
+
+        $choices = is_string($q->choices) ? json_decode($q->choices, true) : $q->choices;
+        $shuffledEntries = [];
+        if ($choices) {
+            foreach ($choices as $k => $v) {
+                $shuffledEntries[] = [$k, $v];
+            }
+        }
+        $questionData = [
+            'id' => $q->id,
+            'section' => $q->section,
+            'content' => $q->content,
+            'choices' => $choices,
+            'answerKey' => $q->answerKey,
+            'shuffledEntries' => $shuffledEntries,
+        ];
+        if ($q->audio) {
+            $questionData['audio'] = ['fileUrl' => $q->audio->fileUrl];
+        }
+        if ($q->passage) {
+            $questionData['passage'] = [
+                'title' => $q->passage->title,
+                'content' => $q->passage->content,
+            ];
+        }
+
+        $packages = \App\Models\TestPackage::all();
+        foreach ($packages as $package) {
+            $existing = is_string($package->questions) ? json_decode($package->questions, true) : ($package->questions ?? []);
+            if (!is_array($existing)) $existing = [];
+
+            $found = false;
+            foreach ($existing as &$eq) {
+                if ($eq['id'] === $q->id) {
+                    $eq = $questionData;
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found && $q->packageId === $package->id) {
+                $existing[] = $questionData;
+                $found = true;
+            }
+
+            if ($found) {
+                $package->questions = $existing;
+                $package->save();
+            }
+        }
+    }
+
+    private function removeQuestionFromPackage($questionId, $packageId)
+    {
+        if (!$packageId) return;
+        $package = \App\Models\TestPackage::find($packageId);
+        if (!$package) return;
+
+        $existing = is_string($package->questions) ? json_decode($package->questions, true) : ($package->questions ?? []);
+        if (!is_array($existing)) return;
+
+        $originalCount = count($existing);
+        $existing = array_values(array_filter($existing, function($eq) use ($questionId) {
+            return $eq['id'] !== $questionId;
+        }));
+
+        if (count($existing) !== $originalCount) {
+            $package->questions = $existing;
+            $package->save();
+        }
+    }
+
+    private function removeQuestionFromAllPackages($questionId)
+    {
+        $packages = \App\Models\TestPackage::all();
+        foreach ($packages as $package) {
+            $existing = is_string($package->questions) ? json_decode($package->questions, true) : ($package->questions ?? []);
+            if (!is_array($existing)) continue;
+
+            $originalCount = count($existing);
+            $existing = array_values(array_filter($existing, function($eq) use ($questionId) {
+                return $eq['id'] !== $questionId;
+            }));
+
+            if (count($existing) !== $originalCount) {
+                $package->questions = $existing;
+                $package->save();
+            }
+        }
+    }
 }
