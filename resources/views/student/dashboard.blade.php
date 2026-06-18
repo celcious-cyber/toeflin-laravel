@@ -8,7 +8,7 @@
         $lastAttempt = $attempts->first();
         $totalThisMonth = $attempts->filter(fn($a) => $a->date->format('Y-m') === date('Y-m'))->count();
         $takenThisWeek = $attempts->filter(fn($a) => $a->date->diffInDays(now()) < 7)->count() > 0;
-        $lastScaledScores = $lastAttempt && $lastAttempt->scaledScores ? json_decode($lastAttempt->scaledScores, true) : null;
+        $lastScaledScores = $lastAttempt && $lastAttempt->scaledScores ? (is_string($lastAttempt->scaledScores) ? json_decode($lastAttempt->scaledScores, true) : $lastAttempt->scaledScores) : null;
     @endphp
 
     <!-- Hero Section -->
