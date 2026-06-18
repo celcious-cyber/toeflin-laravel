@@ -50,3 +50,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard/pengaturan', [AdminController::class, 'pengaturan'])->name('admin.pengaturan');
         Route::post('/dashboard/pengaturan/store', [AdminController::class, 'storeAdmin'])->name('admin.pengaturan.store');
     });
+
+    // Fallback route for storage files (useful for Windows with php artisan serve)
+    Route::get('/storage/{path}', function ($path) {
+        $filePath = storage_path('app/public/' . $path);
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+        return response()->file($filePath);
+    })->where('path', '.*');
