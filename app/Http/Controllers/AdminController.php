@@ -15,16 +15,8 @@ class AdminController extends Controller
         // Total Students
         $totalStudents = User::where('role', 'student')->count();
 
-        // Total Questions (from all packages)
-        // Since questions are stored as JSON in TestPackage, we sum the counts.
-        $packages = TestPackage::all();
-        $totalQuestions = 0;
-        foreach ($packages as $pkg) {
-            $questions = is_array($pkg->questions) ? $pkg->questions : json_decode($pkg->questions, true);
-            if (is_array($questions)) {
-                $totalQuestions += count($questions);
-            }
-        }
+        // Total Questions in Bank
+        $totalQuestions = \App\Models\Question::count();
 
         // Active Attempts (not yet submitted, totalScore is null)
         $totalActiveAttempts = TestAttempt::whereNull('totalScore')->count();
