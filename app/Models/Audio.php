@@ -10,6 +10,7 @@ class Audio extends Model
 {
     use HasUuids;
 
+    protected $table = 'audios';
     protected $fillable = ['fileUrl', 'transcript'];
     public $timestamps = false;
 }
