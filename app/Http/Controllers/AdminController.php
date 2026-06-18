@@ -22,7 +22,7 @@ class AdminController extends Controller
         $totalActiveAttempts = TestAttempt::whereNull('totalScore')->count();
 
         // Pending Requests
-        $totalPendingRequests = TestRequest::where('status', 'PENDING')->count();
+        $totalPendingRequests = TestRequest::where('status', 'pending')->count();
 
         return view('admin.dashboard', compact(
             'totalStudents', 
