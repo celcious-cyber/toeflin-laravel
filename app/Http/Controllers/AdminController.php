@@ -91,7 +91,7 @@ class AdminController extends Controller
         $answerKeys = $request->input('answerKey');
 
         foreach ($contents as $index => $content) {
-            \App\Models\Question::create([
+            $q = \App\Models\Question::create([
                 'id' => \Illuminate\Support\Str::uuid()->toString(),
                 'section' => $request->input('section'),
                 'content' => $content,
@@ -106,6 +106,8 @@ class AdminController extends Controller
                 'passageId' => $passageId,
                 'packageId' => $request->input('packageId'),
             ]);
+
+            $this->syncQuestionToAllPackages($q->id);
         }
 
         return redirect()->back()->with('success', 'Soal berhasil ditambahkan!');
@@ -151,6 +153,8 @@ class AdminController extends Controller
             }
         }
 
+        $oldPackageId = $question->packageId;
+
         $question->update([
             'section' => $request->input('section'),
             'content' => $request->input('content'),
@@ -166,13 +170,23 @@ class AdminController extends Controller
             'packageId' => $request->input('packageId'),
         ]);
 
+        if ($oldPackageId && $oldPackageId !== $request->input('packageId')) {
+            $this->removeQuestionFromPackage($question->id, $oldPackageId);
+        }
+
+        $this->syncQuestionToAllPackages($question->id);
+
         return redirect()->back()->with('success', 'Soal berhasil diperbarui!');
     }
 
     public function destroyQuestion($id)
     {
         $question = \App\Models\Question::findOrFail($id);
+        $questionId = $question->id;
         $question->delete();
+
+        $this->removeQuestionFromAllPackages($questionId);
+
         return redirect()->back()->with('success', 'Soal berhasil dihapus!');
     }
 
