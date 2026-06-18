@@ -3,8 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TOEFLin - Aplikasi Simulasi Computer-Based Test (CBT) TOEFL Terintegrasi dengan fitur Auto-Scoring dan Sertifikat PDF.">
+    <meta name="keywords" content="TOEFL, CBT, Simulasi TOEFL, Belajar TOEFL, Ujian Bahasa Inggris">
+    <meta name="author" content="Celcious Cyber">
+    <meta name="theme-color" content="#4f46e5">
+    <meta property="og:title" content="TOEFLin - CBT Simulation">
+    <meta property="og:description" content="Persiapkan diri Anda untuk menghadapi ujian TOEFL ITP yang sebenarnya dengan TOEFLin.">
+    <meta property="og:type" content="website">
+    
     <title>@yield('title', 'TOEFLin - CBT Simulation')</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -13,6 +26,19 @@
             background-color: #f8fafc;
         }
     </style>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
 </head>
 <body class="text-slate-800 antialiased flex flex-col min-h-screen">
     <nav class="bg-white shadow-sm border-b border-slate-200">
