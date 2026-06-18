@@ -14,6 +14,8 @@
     </style>
 </head>
 <body class="text-slate-800 antialiased flex flex-col min-h-screen no-select" x-data="examEngine()">
+    <audio id="examAudioPlayer" style="display: none;"></audio>
+
     <!-- Start Exam Overlay (Requires user click for Fullscreen API to work) -->
     <div x-show="!examStarted" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 max-w-lg text-center shadow-2xl">
