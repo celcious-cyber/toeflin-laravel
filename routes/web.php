@@ -52,7 +52,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 
     // Fallback route for storage files (useful for Windows with php artisan serve)
-    Route::get('/storage/{path}', function ($path) {
+    Route::get('/stream-audio/{path}', function ($path) {
         $filePath = storage_path('app/public/' . $path);
         if (!file_exists($filePath)) {
             abort(404);

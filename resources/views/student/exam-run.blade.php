@@ -342,7 +342,8 @@
                     if(!this.currentQ || !this.currentQ.audio || this.audioPlayed[this.currentQ.id]) return;
                     
                     const player = document.getElementById('examAudioPlayer');
-                    player.src = this.currentQ.audio.fileUrl;
+                    // Ganti /storage/ dengan /stream-audio/ untuk mem-bypass error symlink php artisan serve di Windows
+                    player.src = this.currentQ.audio.fileUrl.replace('/storage/', '/stream-audio/');
                     player.play().then(() => {
                         this.audioPlayed[this.currentQ.id] = true;
                     }).catch(e => {
