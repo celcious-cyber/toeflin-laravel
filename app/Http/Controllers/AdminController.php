@@ -36,7 +36,7 @@ class AdminController extends Controller
     {
         $packages = TestPackage::orderBy('name')->get();
         $questions = \App\Models\Question::with(['audio', 'passage', 'package'])->orderBy('section')->get();
-        $passages = \App\Models\Passage::orderBy('createdAt', 'desc')->get();
+        $passages = \App\Models\Passage::orderBy('title', 'asc')->get();
         return view('admin.bank-soal', compact('questions', 'packages', 'passages'));
     }
 
