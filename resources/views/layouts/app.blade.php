@@ -15,8 +15,8 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/favicon.svg">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg?v={{ time() }}">
+    <link rel="icon" href="/favicon.svg?v={{ time() }}" type="image/svg+xml">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -47,7 +47,7 @@
                 <!-- Logo (Left) -->
                 <div class="flex items-center w-1/4 md:w-1/3">
                     <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                        <img src="/toeflin.svg" alt="TOEFLin Logo" class="h-8">
+                        <img src="/toeflin.svg?v={{ time() }}" alt="TOEFLin Logo" class="h-8">
                     </a>
                 </div>
 

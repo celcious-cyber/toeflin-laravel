@@ -9,8 +9,8 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}?v={{ time() }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v={{ time() }}">
     <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -35,7 +35,7 @@
         <!-- Logo -->
         <div class="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
             <div class="w-10 h-10 shrink-0">
-                <img src="{{ asset('favicon.svg') }}" alt="TOEFLin" class="w-full h-full object-cover rounded-xl shadow-sm border border-slate-200">
+                <img src="{{ asset('favicon.svg') }}?v={{ time() }}" alt="TOEFLin" class="w-full h-full object-cover rounded-xl shadow-sm border border-slate-200">
             </div>
             <div>
                 <p class="text-sm font-black text-slate-800 leading-none">Admin Portal</p>
