@@ -39,7 +39,7 @@ class StudentController extends Controller
         
         // Cek percobaan ujian dalam 7 hari terakhir
         $recentAttemptsCount = TestAttempt::where('userId', $user->id)
-                                ->where('createdAt', '>=', now()->subDays(7))
+                                ->where('date', '>=', now()->subDays(7))
                                 ->count();
         
         $hasQuota = ($recentAttemptsCount === 0);
@@ -65,7 +65,7 @@ class StudentController extends Controller
 
         // Cek weekly limit
         $recentAttemptsCount = TestAttempt::where('userId', $user->id)
-                                ->where('createdAt', '>=', now()->subDays(7))
+                                ->where('date', '>=', now()->subDays(7))
                                 ->count();
         
         if ($recentAttemptsCount > 0) {
