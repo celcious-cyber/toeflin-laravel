@@ -79,3 +79,53 @@ Route::get('/admin-masuk', function () {
     \Illuminate\Support\Facades\Auth::login($admin, true);
     return redirect()->route('admin.dashboard');
 });
+
+// ─── TEMPORARY SCHEMA FIX ────────────────────────────────────────────────────
+Route::get('/migrate-fix', function () {
+    try {
+        if (!Schema::hasColumn('users', 'id')) {
+            Schema::table('users', function($table) {
+                $table->uuid('id')->nullable()->first();
+            });
+        }
+
+        foreach (DB::table('users')->get() as $row) {
+            if (empty($row->id)) {
+                DB::table('users')->where('email', $row->email)->update([
+                    'id' => (string) Illuminate\Support\Str::uuid()
+                ]);
+            }
+        }
+
+        Schema::table('users', function($table) {
+            $table->uuid('id')->nullable(false)->change();
+        });
+
+        try {
+            Schema::table('users', function($table) {
+                $table->primary('id');
+            });
+        } catch (\Exception $e) {
+            // Already primary key
+        }
+
+        Schema::table('users', function($table) {
+            if (!Schema::hasColumn('users', 'nim')) {
+                $table->string('nim', 50)->nullable()->after('name');
+            }
+            if (!Schema::hasColumn('users', 'fakultas')) {
+                $table->string('fakultas', 100)->nullable()->after('nim');
+            }
+            if (!Schema::hasColumn('users', 'prodi')) {
+                $table->string('prodi', 100)->nullable()->after('fakultas');
+            }
+        });
+
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'AdminSeeder']);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return "✅ Sinkronisasi skema tabel users dan Seeder Admin berhasil!<br><pre>" . $output . "</pre>";
+    } catch (\Exception $e) {
+        return "❌ Error: " . $e->getMessage();
+    }
+});
