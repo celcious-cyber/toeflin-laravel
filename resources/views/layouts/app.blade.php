@@ -104,7 +104,7 @@
                             </div>
                         </div>
                     @else
-                        <a href="/admin-masuk" class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm">Portal Admin</a>
+                        <a href="{{ route('admin.login') }}" class="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">Admin</a>
                     @endauth
                 </div>
             </div>
