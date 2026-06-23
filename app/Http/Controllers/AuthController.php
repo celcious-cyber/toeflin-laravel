@@ -10,64 +10,35 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
+    public function quickJoin(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'nim' => ['required', 'string', 'max:50'],
-            'fakultas' => ['required', 'string', 'max:100'],
-            'prodi' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = User::create([
-            'id' => Str::uuid()->toString(),
-            'name' => $validated['name'],
-            'nim' => $validated['nim'],
-            'fakultas' => $validated['fakultas'],
-            'prodi' => $validated['prodi'],
-            'email' => $validated['email'],
-            'passwordHash' => Hash::make($validated['password']),
-            'role' => 'student',
-        ]);
+        // Cari apakah user dengan nama dan nim ini sudah ada (agar bisa melanjutkan ujian jika terputus)
+        // Gunakan email dummy berbasis nama dan nim agar unik
+        $dummyEmail = Str::slug($validated['name'] . ' ' . $validated['nim']) . '@student.toeflin.com';
 
-        Auth::login($user);
+        $user = User::where('email', $dummyEmail)->first();
 
-        return redirect()->intended('/dashboard');
-    }
-
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
-
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
-            $request->session()->regenerate();
-            
-            $user = Auth::user();
-            if (in_array($user->role, ['admin', 'superadmin'])) {
-                return redirect()->intended('/admin/dashboard');
-            }
-
-            return redirect()->intended('/dashboard');
+        if (!$user) {
+            $user = User::create([
+                'id' => Str::uuid()->toString(),
+                'name' => $validated['name'],
+                'nim' => $validated['nim'],
+                'fakultas' => 'N/A',
+                'prodi' => 'N/A',
+                'email' => $dummyEmail,
+                'passwordHash' => Hash::make(Str::random(16)),
+                'role' => 'student',
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        Auth::login($user, true); // login dan remember
+        
+        return redirect()->intended('/dashboard');
     }
 
     public function logout(Request $request)

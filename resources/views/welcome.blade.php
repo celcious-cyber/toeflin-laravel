@@ -11,15 +11,43 @@
         Persiapkan diri Anda untuk menghadapi ujian TOEFL ITP yang sebenarnya. Dapatkan pengalaman ujian yang realistis lengkap dengan sistem penilaian otomatis dan sertifikat PDF!
     </p>
     
-    <div class="flex justify-center gap-4">
+    <div class="flex justify-center mt-10">
         @auth
-            <a href="{{ route(auth()->user()->role === 'admin' ? 'admin.dashboard' : 'student.dashboard') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors text-lg">
+            <a href="{{ route(auth()->user()->role === 'superadmin' || auth()->user()->role === 'admin' ? 'admin.dashboard' : 'student.dashboard') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors text-lg w-full max-w-sm">
                 Masuk ke Dashboard
             </a>
         @else
-            <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors text-lg">
-                Mulai Simulasi (Login)
-            </a>
+            <form action="{{ route('quick.join') }}" method="POST" class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 max-w-md w-full space-y-6">
+                @csrf
+                <div class="text-left mb-2">
+                    <h2 class="text-2xl font-bold text-slate-800">Mulai Ujian</h2>
+                    <p class="text-sm text-slate-500 mt-1">Masukkan data diri Anda untuk memulai</p>
+                </div>
+                
+                @if ($errors->any())
+                    <div class="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 text-left">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="text-left">
+                    <label for="name" class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Contoh: Budi Santoso">
+                </div>
+                
+                <div class="text-left">
+                    <label for="nim" class="block text-sm font-semibold text-slate-700 mb-2">NIM / ID Pendaftaran</label>
+                    <input type="text" id="nim" name="nim" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Contoh: 12345678">
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all transform hover:-translate-y-0.5">
+                    Mulai Ujian Sekarang
+                </button>
+            </form>
         @endauth
     </div>
 
