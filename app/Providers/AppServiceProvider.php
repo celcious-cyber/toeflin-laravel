@@ -21,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (env('APP_ENV') !== 'local' || env('FORCE_HTTPS', true)) {
+        // Hanya paksa HTTPS di production atau jika FORCE_HTTPS=true secara eksplisit
+        // Bug sebelumnya: default true menyebabkan HTTPS selalu dipaksa di local
+        // sehingga session cookie tidak terbaca setelah redirect (mismatch http vs https)
+        if (env('APP_ENV') === 'production' || env('FORCE_HTTPS', false) === true) {
             URL::forceScheme('https');
         }
     }

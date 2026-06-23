@@ -381,6 +381,7 @@ class AdminController extends Controller
         ]);
         
         $user = new User();
+        $user->id = \Illuminate\Support\Str::uuid()->toString();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->passwordHash = \Illuminate\Support\Facades\Hash::make($request->password);
