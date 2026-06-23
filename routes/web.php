@@ -59,3 +59,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         }
         return response()->file($filePath);
     })->where('path', '.*');
+
+    // Debug Routes
+    Route::get('/debug-session-set', function () {
+        session(['test_session' => 'IT WORKS!']);
+        return redirect('/debug-session-get');
+    });
+    
+    Route::get('/debug-session-get', function () {
+        return session()->all();
+    });
