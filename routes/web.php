@@ -60,26 +60,4 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         return response()->file($filePath);
     })->where('path', '.*');
 
-    // Debug Routes
-    Route::get('/debug-login', function () {
-        $credentials = ['email' => 'superadmin@toeflin.com', 'password' => 'password'];
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
-        
-        if (!$user) {
-            return response()->json(['error' => 'User not found in database. Did the tinker command run?']);
-        }
-        
-        $hashMatch = \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->passwordHash);
-        $attempt = \Illuminate\Support\Facades\Auth::attempt($credentials);
-        
-        return response()->json([
-            'user_id' => $user->id,
-            'user_role' => $user->role,
-            'hash_match' => $hashMatch,
-            'attempt_success' => $attempt,
-            'auth_check' => auth()->check(),
-            'session_data' => session()->all(),
-            'app_url' => config('app.url'),
-            'env' => config('app.env')
-        ]);
-    });
+
