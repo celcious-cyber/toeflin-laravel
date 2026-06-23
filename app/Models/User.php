@@ -15,6 +15,9 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'nim', 'fakultas', 'prodi', 'email', 'passwordHash', 'role'];
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $hidden = ['passwordHash', 'remember_token'];
 
     const CREATED_AT = 'createdAt';
