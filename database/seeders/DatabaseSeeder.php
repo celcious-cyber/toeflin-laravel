@@ -80,5 +80,9 @@ class DatabaseSeeder extends Seeder
             'durations' => ['listening' => 10, 'structure' => 10, 'reading' => 10],
             'status' => 'published',
         ]);
+        
+        $this->call([
+            DummyFullTestSeeder::class,
+        ]);
     }
 }
